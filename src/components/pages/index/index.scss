@@ -39,7 +39,7 @@
 		position: absolute;
 		inset: 0;
 		z-index: 0;
-		background: url('../../../assets/img/bg-move.jpg') 0 0 / auto 100% repeat-x;
+		background: url('../../../assets/img/bg-move.jpg') top/cover repeat-x;
 		animation: bgScroll 12s linear infinite;
 	}
 
@@ -71,9 +71,9 @@
 		position: absolute;
 		left: 50%;
 		transform: translateX(-50%);
-		bottom: 112px;
-		width: 160px;
-		height: 160px;
+		top: 30%;
+		width: 180px;
+		height: 180px;
 		animation: birdFloat 2.2s ease-in-out infinite;
 		filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
 		cursor: pointer;
