@@ -501,3 +501,25 @@
 		transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--rot)) scale(0.4);
 	}
 }
+
+// ─── Win label ────────────────────────────────────────────────────────────────
+
+.win-label {
+	position: absolute;
+	transform: translateX(-50%);
+	color: #ffd700;
+	font-size: 28px;
+	font-weight: 900;
+	text-shadow: 0 0 12px rgba(255, 180, 0, 0.9), 0 2px 4px rgba(0,0,0,0.6);
+	pointer-events: none;
+	z-index: 20;
+	white-space: nowrap;
+	animation: winLabelFly 1.2s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes winLabelFly {
+	0%   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(0.6); }
+	20%  { opacity: 1; transform: translateX(-50%) translateY(-10px) scale(1.2); }
+	80%  { opacity: 1; transform: translateX(-50%) translateY(-60px) scale(1); }
+	100% { opacity: 0; transform: translateX(-50%) translateY(-80px) scale(0.8); }
+}

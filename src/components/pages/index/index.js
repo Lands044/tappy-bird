@@ -7,9 +7,9 @@ class TappyBird {
 	constructor() {
 		this.betIndex = BET_OPTIONS.indexOf(6);
 		this.balance = 100000;
-		this.lastWin = 90;
+		this.lastWin = 0;
 		this.spinning = false;
-		this.spinsLeft = 0;
+		this.clickCount = 0;
 		this.confettiAnimation = null;
 
 		this.elBalance  = document.getElementById('balance');
@@ -69,12 +69,29 @@ class TappyBird {
 		this._animateBird();
 		this._render();
 
+		this.clickCount++;
+
 		setTimeout(() => {
-			const win = this._calcWin(bet);
-			this.lastWin = win;
-			if (win > 0) {
+			if (this.clickCount === 2) {
+				const win = +(bet * 0.2).toFixed(2);
+				this.lastWin = win;
 				this.balance += win;
 				this._playSound(this.winSound);
+				this._spawnWinLabel(`+${win.toFixed(2)}`);
+			} else if (this.clickCount >= 3) {
+				const win = +(bet * 0.8).toFixed(2);
+				this.lastWin = win;
+				this.balance += win;
+				this._playSound(this.winSound);
+				this._spawnWinLabel(`+${win.toFixed(2)}`);
+				this.clickCount = 0;
+				this.spinning = false;
+				this.elSpin.disabled = false;
+				this.elBetMinus.disabled = false;
+				this.elBetPlus.disabled = false;
+				this._render();
+				this._showCTA();
+				return;
 			}
 
 			this.spinning = false;
@@ -82,23 +99,22 @@ class TappyBird {
 			this.elBetMinus.disabled = false;
 			this.elBetPlus.disabled = false;
 			this._render();
-
-			if (this._shouldShowCTA()) {
-				this._showCTA();
-			}
 		}, SPIN_INTERVAL_MS);
 	}
 
-	_calcWin(bet) {
-		const roll = Math.random();
-		if (roll < 0.08)  return +(bet * 15).toFixed(2);
-		if (roll < 0.25)  return +(bet * 5).toFixed(2);
-		if (roll < 0.45)  return +(bet * 2).toFixed(2);
-		return 0;
-	}
+	_spawnWinLabel(text) {
+		const scene = this.elBird.parentElement;
+		const birdRect = this.elBird.getBoundingClientRect();
+		const sceneRect = scene.getBoundingClientRect();
 
-	_shouldShowCTA() {
-		return Math.random() < 0.25;
+		const el = document.createElement('div');
+		el.className = 'win-label';
+		el.textContent = text;
+		el.style.left = (birdRect.left - sceneRect.left + birdRect.width / 2) + 'px';
+		el.style.top  = (birdRect.top  - sceneRect.top) + 'px';
+
+		scene.appendChild(el);
+		setTimeout(() => el.remove(), 1200);
 	}
 
 	_animateBird() {
