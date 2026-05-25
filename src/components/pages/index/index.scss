@@ -1,0 +1,175 @@
+.page {
+	background: url('../../../assets/img/bg.jpg') center/cover no-repeat;
+	min-height: 100vh;
+	min-height: 100dvh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	&__container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		width: 100%;
+
+		@media (max-width:toEm($mobile)) and (pointer: coarse){
+
+		}
+	}
+}
+
+
+.popup {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1000;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.5s ease, visibility 0.5s ease;
+
+	&.show {
+		opacity: 1;
+		visibility: visible;
+
+		.popup__overlay {
+			opacity: 1;
+		}
+
+		.popup__content {
+			scale: 1;
+			opacity: 1;
+		}
+
+		.confetti-canvas {
+			opacity: 1;
+		}
+	}
+
+	&__overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.65);
+		backdrop-filter: blur(10px);
+		opacity: 0;
+		transition: opacity 0.5s ease;
+	}
+
+	&__content {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		scale: 0.7;
+		opacity: 0;
+		transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+		z-index: 100;
+	}
+
+	&__inner {
+		background-color: #5b2457;
+		border: 4px solid #ffd700;
+		border-radius: 30px;
+		padding: 50px 60px;
+		text-align: center;
+		box-shadow: 0 20px 60px rgba(255, 215, 0, 0.3),
+					0 0 40px rgba(255, 107, 157, 0.4),
+					inset 0 2px 20px rgba(255, 255, 255, 0.1);
+		position: relative;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+
+		@media (max-width:toEm($mobile)) and (pointer: coarse) {
+			padding: 40px 30px;
+			border-radius: 20px;
+			border-width: 3px;
+		}
+	}
+
+	&__title {
+		font-size: 48px;
+		font-weight: 700;
+		color: #ffd700;
+		text-shadow: 0 0 20px rgba(255, 215, 0, 0.5),
+					 0 4px 8px rgba(0, 0, 0, 0.5);
+		margin-bottom: 20px;
+		text-transform: uppercase;
+		letter-spacing: 2px;
+		animation: titleGlow 2s ease-in-out infinite;
+
+		@media (max-width:toEm($mobile)) and (pointer: coarse) {
+			font-size: 24px;
+			margin-bottom: 15px;
+		}
+	}
+
+	&__text {
+		font-size: 24px;
+		font-weight: 600;
+		color: #fff;
+		margin-bottom: 40px;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+
+		@media (max-width:toEm($mobile)) and (pointer: coarse) {
+			font-size: 16px;
+			margin-bottom: 30px;
+		}
+	}
+}
+
+.cta-button {
+	background-color: $purple;
+	color: #fff;
+	padding: 15px 25px;
+	font-size: 22px;
+	font-weight: 700;
+	border-radius: 12px;
+	border: 2px solid #fff;
+	text-align: center;
+	animation: ctaPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes ctaPulse {
+	0% {
+		transform: scale(1);
+		box-shadow: 0 0 0 0 rgba($purple, 0.7);
+	}
+	50% {
+		transform: scale(1.05);
+		box-shadow: 0 0 20px 10px rgba($purple, 0.3);
+	}
+	100% {
+		transform: scale(1);
+		box-shadow: 0 0 0 0 rgba($purple, 0);
+	}
+}
+
+// Canvas для конфеті
+.confetti-canvas {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 99;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+
+	.popup.show & {
+		opacity: 1;
+	}
+
+	canvas {
+		display: block;
+	}
+}
