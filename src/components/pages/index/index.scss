@@ -12,20 +12,383 @@
 		justify-content: center;
 		height: 100%;
 		width: 100%;
+	}
+}
 
-		@media (max-width:toEm($mobile)) and (pointer: coarse){
+// ─── Game shell ───────────────────────────────────────────────────────────────
 
+.game {
+	position: relative;
+	width: 390px;
+	height: 844px;
+	max-height: 100dvh;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	border-radius: 0;
+	font-family: system-ui, -apple-system, sans-serif;
+
+	@media (max-width: 430px) {
+		width: 100vw;
+		height: 100dvh;
+		border-radius: 0;
+	}
+
+	// Moving background
+	&__bg {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+		background: url('../../../assets/img/bg-move.jpg') 0 0 / auto 100% repeat-x;
+		animation: bgScroll 12s linear infinite;
+	}
+
+	// ─── Jackpots ───────────────────────────────────────────────────────────
+
+	&__jackpots {
+		position: relative;
+		z-index: 2;
+		display: flex;
+		justify-content: center;
+		align-items: flex-start;
+		gap: 8px;
+		padding: 12px 10px 0;
+		flex-shrink: 0;
+	}
+
+	// ─── Scene (bird + wires) ───────────────────────────────────────────────
+
+	&__scene {
+		position: relative;
+		z-index: 2;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+	}
+
+	&__bird {
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+		bottom: 112px;
+		width: 160px;
+		height: 160px;
+		animation: birdFloat 2.2s ease-in-out infinite;
+		filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+	}
+
+	&__bird-img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+
+	&__wires {
+		position: relative;
+		width: 100%;
+		height: 160px;
+		flex-shrink: 0;
+	}
+
+	&__wires-svg {
+		width: 100%;
+		height: 100%;
+	}
+
+	&__freespins {
+		position: absolute;
+		right: 14px;
+		bottom: 24px;
+		width: 96px;
+		height: 96px;
+		border-radius: 50%;
+		background: radial-gradient(circle at 35% 35%, #f5c842, #c87a00);
+		border: 3px solid #fff8c0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		animation: nestPulse 2s ease-in-out infinite;
+		box-shadow: 0 0 18px rgba(255, 200, 40, 0.7), 0 4px 12px rgba(0,0,0,0.4);
+
+		span {
+			color: #1a6bcc;
+			font-size: 11px;
+			font-weight: 900;
+			text-align: center;
+			line-height: 1.2;
+			text-transform: uppercase;
+			text-shadow: 0 1px 2px rgba(255,255,255,0.6);
+			letter-spacing: 0.5px;
+		}
+
+		&-glow {
+			position: absolute;
+			inset: -6px;
+			border-radius: 50%;
+			background: radial-gradient(circle, rgba(255,220,60,0.4) 0%, transparent 70%);
+			animation: glowPulse 2s ease-in-out infinite;
+		}
+	}
+
+	// ─── Info bar ────────────────────────────────────────────────────────────
+
+	&__info {
+		position: relative;
+		z-index: 2;
+		display: flex;
+		justify-content: space-between;
+		gap: 6px;
+		padding: 0 10px 6px;
+		flex-shrink: 0;
+	}
+
+	&__info-item {
+		background: #7c3fba;
+		border: 2px solid #a060d8;
+		border-radius: 24px;
+		padding: 5px 10px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__info-label {
+		color: #c8f060;
+		font-size: 8.5px;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.3px;
+		line-height: 1.2;
+		white-space: nowrap;
+	}
+
+	&__info-value {
+		color: #fff;
+		font-size: 12px;
+		font-weight: 800;
+		white-space: nowrap;
+	}
+
+	// ─── Controls ────────────────────────────────────────────────────────────
+
+	&__controls {
+		position: relative;
+		z-index: 2;
+		background: linear-gradient(180deg, #4a2080 0%, #2a0a50 100%);
+		border-top: 3px solid #6a30a0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 10px 20px 8px;
+		gap: 10px;
+		flex-shrink: 0;
+	}
+
+	&__btn-minus,
+	&__btn-plus {
+		width: 56px;
+		height: 56px;
+		border-radius: 50%;
+		background: linear-gradient(145deg, #cc50cc, #9020a0);
+		border: 3px solid #ff80ff;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 4px 12px rgba(150, 0, 150, 0.5), inset 0 1px 3px rgba(255,255,255,0.2);
+		transition: transform 0.1s, box-shadow 0.1s;
+
+		svg {
+			width: 26px;
+			height: 26px;
+		}
+
+		&:active {
+			transform: scale(0.92);
+			box-shadow: 0 2px 6px rgba(150, 0, 150, 0.4);
+		}
+	}
+
+	&__spin-wrap {
+		position: relative;
+		width: 130px;
+		height: 130px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		&::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			border-radius: 50%;
+			background: conic-gradient(#888 0deg, #bbb 90deg, #666 180deg, #aaa 270deg, #888 360deg);
+			box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+		}
+	}
+
+	&__spin {
+		position: relative;
+		z-index: 1;
+		width: 112px;
+		height: 112px;
+		border-radius: 50%;
+		background: linear-gradient(145deg, #80e040, #3aaa00);
+		border: 4px solid #a0ff50;
+		color: #fff;
+		font-size: 22px;
+		font-weight: 900;
+		letter-spacing: 1px;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 6px 20px rgba(60, 180, 0, 0.6), inset 0 2px 6px rgba(255,255,255,0.3);
+		text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+		transition: transform 0.12s, box-shadow 0.12s;
+		animation: spinPulse 2s ease-in-out infinite;
+
+		&:active {
+			transform: scale(0.94);
+			box-shadow: 0 3px 10px rgba(60, 180, 0, 0.4);
+			animation: none;
+		}
+	}
+
+	// ─── Bottom icon buttons ─────────────────────────────────────────────────
+
+	&__bottom-btns {
+		position: relative;
+		z-index: 2;
+		background: #2a0a50;
+		display: flex;
+		justify-content: space-between;
+		padding: 6px 30px 10px;
+		flex-shrink: 0;
+	}
+
+	&__icon-btn {
+		width: 38px;
+		height: 38px;
+		border-radius: 50%;
+		background: #5a2090;
+		border: 2px solid #8040c0;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: transform 0.1s, background 0.1s;
+
+		svg {
+			width: 20px;
+			height: 20px;
+		}
+
+		&:active {
+			transform: scale(0.9);
+			background: #7030b0;
 		}
 	}
 }
 
+// ─── Jackpot badges ───────────────────────────────────────────────────────────
+
+.jackpot {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 5px 12px 6px;
+	border-radius: 8px;
+	min-width: 88px;
+
+	&__label {
+		font-size: 13px;
+		font-weight: 900;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		line-height: 1;
+	}
+
+	&__value {
+		font-size: 20px;
+		font-weight: 900;
+		line-height: 1.2;
+	}
+
+	&--minor {
+		background: #fff;
+		border: 3px solid #60cc20;
+
+		.jackpot__label { color: #60cc20; }
+		.jackpot__value { color: #60cc20; }
+	}
+
+	&--grand {
+		background: #fff8e0;
+		border: 3px solid #d4a000;
+		transform: scale(1.1);
+
+		.jackpot__label { color: #d4a000; }
+		.jackpot__value { color: #d4a000; }
+	}
+
+	&--major {
+		background: #fff;
+		border: 3px solid #e03030;
+
+		.jackpot__label { color: #e03030; }
+		.jackpot__value { color: #e03030; }
+	}
+}
+
+// ─── Animations ───────────────────────────────────────────────────────────────
+
+@keyframes birdSpin {
+	0%   { transform: translateX(-50%) scale(1)    rotate(0deg); }
+	25%  { transform: translateX(-50%) scale(1.15) rotate(-20deg) translateY(-20px); }
+	75%  { transform: translateX(-50%) scale(1.15) rotate(20deg)  translateY(-20px); }
+	100% { transform: translateX(-50%) scale(1)    rotate(0deg); }
+}
+
+.game__bird--spin {
+	animation: birdSpin 0.8s ease-in-out !important;
+}
+
+@keyframes bgScroll {
+	from { background-position: 0 0; }
+	to   { background-position: -1920px 0; }
+}
+
+@keyframes birdFloat {
+	0%   { transform: translateX(-50%) translateY(0)   rotate(-3deg); }
+	50%  { transform: translateX(-50%) translateY(-14px) rotate(3deg); }
+	100% { transform: translateX(-50%) translateY(0)   rotate(-3deg); }
+}
+
+@keyframes spinPulse {
+	0%, 100% { box-shadow: 0 6px 20px rgba(60, 180, 0, 0.6), inset 0 2px 6px rgba(255,255,255,0.3); }
+	50%       { box-shadow: 0 6px 30px rgba(60, 180, 0, 0.9), 0 0 20px rgba(120, 255, 60, 0.5), inset 0 2px 6px rgba(255,255,255,0.3); }
+}
+
+@keyframes nestPulse {
+	0%, 100% { transform: scale(1); }
+	50%       { transform: scale(1.07); }
+}
+
+@keyframes glowPulse {
+	0%, 100% { opacity: 0.6; }
+	50%       { opacity: 1; }
+}
+
+// ─── Popup ────────────────────────────────────────────────────────────────────
 
 .popup {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
+	position: absolute;
+	inset: 0;
 	z-index: 1000;
 	opacity: 0;
 	visibility: hidden;
@@ -35,26 +398,13 @@
 		opacity: 1;
 		visibility: visible;
 
-		.popup__overlay {
-			opacity: 1;
-		}
-
-		.popup__content {
-			scale: 1;
-			opacity: 1;
-		}
-
-		.confetti-canvas {
-			opacity: 1;
-		}
+		.popup__overlay { opacity: 1; }
+		.popup__content { scale: 1; opacity: 1; }
 	}
 
 	&__overlay {
 		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
+		inset: 0;
 		background: rgba(0, 0, 0, 0.65);
 		backdrop-filter: blur(10px);
 		opacity: 0;
@@ -70,67 +420,46 @@
 		opacity: 0;
 		transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 		z-index: 100;
+		width: 80%;
 	}
 
 	&__inner {
 		background-color: #5b2457;
 		border: 4px solid #ffd700;
-		border-radius: 30px;
-		padding: 50px 60px;
+		border-radius: 24px;
+		padding: 36px 28px;
 		text-align: center;
-		box-shadow: 0 20px 60px rgba(255, 215, 0, 0.3),
-					0 0 40px rgba(255, 107, 157, 0.4),
-					inset 0 2px 20px rgba(255, 255, 255, 0.1);
-		position: relative;
-		overflow: hidden;
+		box-shadow: 0 20px 60px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 107, 157, 0.4);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-
-		@media (max-width:toEm($mobile)) and (pointer: coarse) {
-			padding: 40px 30px;
-			border-radius: 20px;
-			border-width: 3px;
-		}
 	}
 
 	&__title {
-		font-size: 48px;
+		font-size: 28px;
 		font-weight: 700;
 		color: #ffd700;
-		text-shadow: 0 0 20px rgba(255, 215, 0, 0.5),
-					 0 4px 8px rgba(0, 0, 0, 0.5);
-		margin-bottom: 20px;
+		text-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 0 4px 8px rgba(0,0,0,0.5);
+		margin-bottom: 14px;
 		text-transform: uppercase;
 		letter-spacing: 2px;
-		animation: titleGlow 2s ease-in-out infinite;
-
-		@media (max-width:toEm($mobile)) and (pointer: coarse) {
-			font-size: 24px;
-			margin-bottom: 15px;
-		}
 	}
 
 	&__text {
-		font-size: 24px;
+		font-size: 16px;
 		font-weight: 600;
 		color: #fff;
-		margin-bottom: 40px;
-		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-
-		@media (max-width:toEm($mobile)) and (pointer: coarse) {
-			font-size: 16px;
-			margin-bottom: 30px;
-		}
+		margin-bottom: 28px;
+		text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 	}
 }
 
 .cta-button {
-	background-color: $purple;
+	display: block;
+	background-color: #e01010;
 	color: #fff;
-	padding: 15px 25px;
-	font-size: 22px;
+	padding: 14px 24px;
+	font-size: 18px;
 	font-weight: 700;
 	border-radius: 12px;
 	border: 2px solid #fff;
@@ -139,37 +468,7 @@
 }
 
 @keyframes ctaPulse {
-	0% {
-		transform: scale(1);
-		box-shadow: 0 0 0 0 rgba($purple, 0.7);
-	}
-	50% {
-		transform: scale(1.05);
-		box-shadow: 0 0 20px 10px rgba($purple, 0.3);
-	}
-	100% {
-		transform: scale(1);
-		box-shadow: 0 0 0 0 rgba($purple, 0);
-	}
-}
-
-// Canvas для конфеті
-.confetti-canvas {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	pointer-events: none;
-	z-index: 99;
-	opacity: 0;
-	transition: opacity 0.3s ease;
-
-	.popup.show & {
-		opacity: 1;
-	}
-
-	canvas {
-		display: block;
-	}
+	0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(224, 16, 16, 0.7); }
+	50%  { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(224, 16, 16, 0.3); }
+	100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(224, 16, 16, 0); }
 }
