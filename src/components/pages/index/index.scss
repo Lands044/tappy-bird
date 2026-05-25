@@ -76,6 +76,7 @@
 		height: 160px;
 		animation: birdFloat 2.2s ease-in-out infinite;
 		filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+		cursor: pointer;
 	}
 
 	&__bird-img {
@@ -471,4 +472,32 @@
 	0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(224, 16, 16, 0.7); }
 	50%  { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(224, 16, 16, 0.3); }
 	100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(224, 16, 16, 0); }
+}
+
+// ─── Feather particle ─────────────────────────────────────────────────────────
+
+.feather {
+	position: absolute;
+	width: 10px;
+	height: 22px;
+	border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%;
+	background: var(--fc, #3a8c1a);
+	transform: translate(-50%, -50%);
+	pointer-events: none;
+	z-index: 10;
+	animation: featherFly 0.65s var(--delay, 0ms) cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+}
+
+@keyframes featherFly {
+	0% {
+		opacity: 1;
+		transform: translate(-50%, -50%) rotate(0deg) scale(1);
+	}
+	60% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--rot)) scale(0.4);
+	}
 }

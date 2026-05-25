@@ -42,6 +42,7 @@ class TappyBird {
 		this.elBetMinus.addEventListener('click', () => this._changeBet(-1));
 		this.elBetPlus.addEventListener('click',  () => this._changeBet(1));
 		this.elSpin.addEventListener('click', () => this._spin());
+		this.elBird.addEventListener('click', () => this._spin());
 		this.elFreeSpins.addEventListener('click', () => this._buyFreeSpins());
 		this.elSound.addEventListener('click', () => this._toggleSound());
 	}
@@ -103,6 +104,36 @@ class TappyBird {
 	_animateBird() {
 		this.elBird.classList.add('game__bird--spin');
 		setTimeout(() => this.elBird.classList.remove('game__bird--spin'), SPIN_INTERVAL_MS);
+		this._spawnFeathers();
+	}
+
+	_spawnFeathers() {
+		const COLORS = ['#3a8c1a', '#1a5c0a', '#5ab020', '#e8a800', '#2d7010', '#7acc30'];
+		const scene = this.elBird.parentElement;
+		const birdRect = this.elBird.getBoundingClientRect();
+		const sceneRect = scene.getBoundingClientRect();
+
+		const cx = birdRect.left - sceneRect.left + birdRect.width / 2;
+		const cy = birdRect.top  - sceneRect.top  + birdRect.height / 2;
+
+		for (let i = 0; i < 14; i++) {
+			const el = document.createElement('div');
+			el.className = 'feather';
+			el.style.setProperty('--fc', COLORS[i % COLORS.length]);
+
+			const angle = (Math.random() * 360) * (Math.PI / 180);
+			const dist  = 60 + Math.random() * 80;
+			el.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+			el.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+			el.style.setProperty('--rot', `${Math.random() * 720 - 360}deg`);
+			el.style.setProperty('--delay', `${Math.random() * 80}ms`);
+
+			el.style.left = cx + 'px';
+			el.style.top  = cy + 'px';
+
+			scene.appendChild(el);
+			setTimeout(() => el.remove(), 700);
+		}
 	}
 
 	_buyFreeSpins() {
