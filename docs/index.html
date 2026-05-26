@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="shortcut icon" href="./assets/img/favicon.ico">
+		<title>Tappy Bird</title>
+		<script type="module" crossorigin="" src="./js/index.min.js?v=1779805403782"></script>
+		<link rel="modulepreload" crossorigin="" href="./js/common.min.js?v=1779805403782">
+		<link rel="stylesheet" crossorigin="" href="./css/index.min.css?v=1779805403782">
+	</head>
+	<body>
+		<div class="wrapper">
+			<main class="page">
+				<div class="page__container">
+					<div class="game">
+						<!-- Moving background -->
+						<div class="game__bg"></div>
+						<!-- Jackpot bars -->
+						<div class="game__jackpots">
+							<div class="jackpot jackpot--minor">
+								<span class="jackpot__label">MINOR</span>
+								<span class="jackpot__value" id="jackpotMinor">17.79</span>
+							</div>
+							<div class="jackpot jackpot--grand">
+								<span class="jackpot__label">GRAND</span>
+								<span class="jackpot__value" id="jackpotGrand">146.62</span>
+							</div>
+							<div class="jackpot jackpot--major">
+								<span class="jackpot__label">MAJOR</span>
+								<span class="jackpot__value" id="jackpotMajor">30.56</span>
+							</div>
+						</div>
+						<!-- Game scene -->
+						<div class="game__scene">
+							<!-- Bird -->
+							<div class="game__bird" id="bird">
+								<img class="game__bird-img" alt="bird" src="./assets/img/birdie.webp">
+							</div>
+							<!-- Wires and pole -->
+							<div class="game__wires">
+								<!-- Free spins nest button -->
+								<div class="game__freespins" id="freeSpinsBtn">
+									<div class="game__freespins-glow"></div>
+									<span>
+										КУПИТИ
+										<br>
+										ФРІСПІНИ
+									</span>
+								</div>
+							</div>
+						</div>
+						<!-- Info bar -->
+						<div class="game__info">
+							<div class="game__info-item">
+								<span class="game__info-label">БАЛАНС</span>
+								<span class="game__info-value" id="balance">€100,000.00</span>
+							</div>
+							<div class="game__info-item">
+								<span class="game__info-label">СТАВКА</span>
+								<span class="game__info-value" id="bet">€6.00</span>
+							</div>
+							<div class="game__info-item">
+								<span class="game__info-label">ОСТАННІЙ ВИГРАШ</span>
+								<span class="game__info-value" id="lastWin">€90.00</span>
+							</div>
+						</div>
+						<!-- Controls -->
+						<div class="game__controls" id="gameControls">
+							<button class="game__btn-minus" id="betMinus">
+								<svg viewbox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+									<rect x="8" y="17" width="24" height="6" fill="white" rx="3"></rect>
+								</svg>
+							</button>
+							<div class="game__spin-wrap">
+								<button class="game__spin" id="spinBtn">СПІН</button>
+							</div>
+							<button class="game__btn-plus" id="betPlus">
+								<svg viewbox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+									<rect x="8" y="17" width="24" height="6" fill="white" rx="3"></rect>
+									<rect x="17" y="8" width="6" height="24" fill="white" rx="3"></rect>
+								</svg>
+							</button>
+						</div>
+						<!-- Bottom icon buttons -->
+						<div class="game__bottom-btns">
+							<div class="game__bottom-wrap">
+								<button class="game__icon-btn" id="soundBtn" title="Sound">
+									<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+										<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" fill="white"></path>
+									</svg>
+								</button>
+								<button class="game__icon-btn" id="infoBtn" title="Info">
+									<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+										<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="white"></path>
+									</svg>
+								</button>
+							</div>
+							<div class="game__bottom-wrap">
+								<button class="game__icon-btn" id="autoBtn" title="Auto">
+									<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+										<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" fill="white"></path>
+									</svg>
+								</button>
+								<button class="game__icon-btn" id="refreshBtn" title="Refresh">
+									<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+										<path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="white"></path>
+									</svg>
+								</button>
+							</div>
+						</div>
+					</div>
+					<!-- Popup -->
+					<div class="popup">
+						<div class="popup__overlay"></div>
+						<div class="popup__content">
+							<div class="popup__inner">
+								<h2 class="popup__title">Congratulations!</h2>
+								<p class="popup__text">Ready to continue playing?</p>
+								<a class="cta-button" href="#">Download Now</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</main>
+		</div>
+		<div class="rotate-overlay">
+			<div class="rotate-overlay__content">
+				<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+					<rect x="4" y="2" width="16" height="20" rx="2"></rect>
+					<path d="M12 18h.01"></path>
+				</svg>
+				<p>Please rotate your device to portrait mode</p>
+			</div>
+		</div>
+	</body>
+</html>
