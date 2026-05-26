@@ -28,6 +28,8 @@
 	border-radius: 0;
 	box-shadow: 0 0 60px rgba(0, 0, 0, 0.7), 0 0 120px rgba(0, 0, 0, 0.4);
 	font-family: system-ui, -apple-system, sans-serif;
+	user-select: none;
+	-webkit-user-select: none;
 
 	@media (max-width: 430px) {
 		width: 100vw;
@@ -78,6 +80,7 @@
 		animation: birdFloat 2.2s ease-in-out infinite;
 		filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
 		cursor: pointer;
+		touch-action: manipulation;
 	}
 
 	&__bird-img {
@@ -224,6 +227,7 @@
 		justify-content: center;
 		box-shadow: 0 4px 12px rgba(150, 0, 150, 0.5), inset 0 1px 3px rgba(255,255,255,0.2);
 		transition: transform 0.1s, box-shadow 0.1s;
+		touch-action: manipulation;
 
 		svg {
 			width: 26px;
@@ -275,6 +279,7 @@
 		text-shadow: 0 2px 4px rgba(0,0,0,0.4);
 		transition: transform 0.12s, box-shadow 0.12s;
 		animation: spinPulse 2s ease-in-out infinite;
+		touch-action: manipulation;
 
 		&:active {
 			transform: scale(0.94);
@@ -306,6 +311,7 @@
 		align-items: center;
 		justify-content: center;
 		transition: transform 0.1s, background 0.1s;
+		touch-action: manipulation;
 
 		svg {
 			width: 20px;
@@ -409,6 +415,19 @@
 	50%       { opacity: 1; }
 }
 
+// ─── Confetti ─────────────────────────────────────────────────────────────────
+
+.confetti-canvas {
+	position: fixed;
+	inset: 0;
+	z-index: 1001;
+	pointer-events: none;
+
+	canvas {
+		display: block;
+	}
+}
+
 // ─── Popup ────────────────────────────────────────────────────────────────────
 
 .popup {
@@ -430,6 +449,7 @@
 	&__overlay {
 		position: absolute;
 		inset: 0;
+		z-index: 1;
 		background: rgba(0, 0, 0, 0.65);
 		backdrop-filter: blur(10px);
 		opacity: 0;
