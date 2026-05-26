@@ -26,6 +26,7 @@
 	display: flex;
 	flex-direction: column;
 	border-radius: 0;
+	box-shadow: 0 0 60px rgba(0, 0, 0, 0.7), 0 0 120px rgba(0, 0, 0, 0.4);
 	font-family: system-ui, -apple-system, sans-serif;
 
 	@media (max-width: 430px) {
@@ -194,7 +195,7 @@
 			left: 0;
 			width: 100%;
 			height: 100%;
-			border-top: 3px solid #fff;
+			border-top: 6px solid #fff;
 			background: linear-gradient(180deg, #4a2080 0%, #2a0a50 100%);
 			border-top-left-radius: 90%;
 			border-top-right-radius: 90%;
