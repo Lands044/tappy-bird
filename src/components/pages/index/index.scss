@@ -178,15 +178,35 @@
 
 	&__controls {
 		position: relative;
-		z-index: 2;
-		background: linear-gradient(180deg, #4a2080 0%, #2a0a50 100%);
-		border-top: 3px solid #6a30a0;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		padding: 10px 20px 8px;
 		gap: 10px;
 		flex-shrink: 0;
+		margin-bottom: -40px;
+		z-index: 5;
+
+		&::after {
+			position: absolute;
+			content: '';
+			top: 35%;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			border-top: 3px solid #fff;
+			background: linear-gradient(180deg, #4a2080 0%, #2a0a50 100%);
+			border-top-left-radius: 90%;
+			border-top-right-radius: 90%;
+			z-index: -1;
+		}
+	}
+
+	&__bottom-wrap {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
 	}
 
 	&__btn-minus,
@@ -221,6 +241,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		z-index: 5;
 
 		&::before {
 			content: '';
@@ -265,11 +286,11 @@
 	&__bottom-btns {
 		position: relative;
 		z-index: 2;
-		background: #2a0a50;
 		display: flex;
 		justify-content: space-between;
 		padding: 6px 30px 10px;
 		flex-shrink: 0;
+		z-index: 10;
 	}
 
 	&__icon-btn {
@@ -421,7 +442,8 @@
 		opacity: 0;
 		transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 		z-index: 100;
-		width: 80%;
+		max-width: 380px;
+		width: 100%;
 	}
 
 	&__inner {
