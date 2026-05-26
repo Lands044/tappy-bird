@@ -1,5 +1,5 @@
 .page {
-	background: url('../../../assets/img/bg.jpg') center/cover no-repeat;
+	background: url('../../../assets/img/bg.webp') center/cover no-repeat;
 	min-height: 100vh;
 	min-height: 100dvh;
 	display: flex;
@@ -40,7 +40,7 @@
 		position: absolute;
 		inset: 0;
 		z-index: 0;
-		background: url('../../../assets/img/bg-move.jpg') top/cover repeat-x;
+		background: url('../../../assets/img/bg-move.webp') bottom left / auto 100% repeat-x;
 		animation: bgScroll 12s linear infinite;
 	}
 
@@ -149,7 +149,7 @@
 	&__info-item {
 		background: #7c3fba;
 		border: 2px solid #fff;
-		border-radius: 24px;
+		border-radius: 18px;
 		padding: 5px 10px;
 		display: flex;
 		flex-direction: column;
@@ -161,7 +161,7 @@
 
 	&__info-label {
 		color: #6dff75;
-		font-size: 9px;
+		font-size: 10px;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.3px;
@@ -384,8 +384,8 @@
 }
 
 @keyframes bgScroll {
-	from { background-position: 0 0; }
-	to   { background-position: -1920px 0; }
+	from { background-position: 0 bottom; }
+	to   { background-position: -1920px bottom; }
 }
 
 @keyframes birdFloat {
