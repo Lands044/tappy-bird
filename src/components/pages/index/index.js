@@ -117,15 +117,31 @@ class TappyBird {
 		osc.stop(t + 0.06);
 	}
 
+	_tap(el, fn) {
+		let touched = false;
+		el.addEventListener('touchstart', (e) => {
+			e.preventDefault();
+			touched = true;
+		}, { passive: false });
+		el.addEventListener('touchend', (e) => {
+			e.preventDefault();
+			if (touched) { touched = false; fn(); }
+		}, { passive: false });
+		el.addEventListener('click', () => {
+			if (touched) return;
+			fn();
+		});
+	}
+
 	_bindEvents() {
-		this.elBetMinus.addEventListener('click', () => this._changeBet(-1));
-		this.elBetPlus.addEventListener('click',  () => this._changeBet(1));
-		this.elSpin.addEventListener('click', () => this._spin());
-		this.elBird.addEventListener('click', () => this._spin());
-		this.elFreeSpins.addEventListener('click', () => this._buyFreeSpins());
-		this.elSound.addEventListener('click', () => this._toggleSound());
-		this.elAuto.addEventListener('click', () => this._autoPlay());
-		this.elRefresh.addEventListener('click', () => this._resetGame());
+		this._tap(this.elBetMinus,  () => this._changeBet(-1));
+		this._tap(this.elBetPlus,   () => this._changeBet(1));
+		this._tap(this.elSpin,      () => this._spin());
+		this._tap(this.elBird,      () => this._spin());
+		this._tap(this.elFreeSpins, () => this._buyFreeSpins());
+		this._tap(this.elSound,     () => this._toggleSound());
+		this._tap(this.elAuto,      () => this._autoPlay());
+		this._tap(this.elRefresh,   () => this._resetGame());
 	}
 
 	_changeBet(dir) {
