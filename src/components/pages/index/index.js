@@ -162,11 +162,10 @@ class TappyBird {
 		this.elBetMinus.disabled = true;
 		this.elBetPlus.disabled = true;
 
+		this.clickCount++;
 		this._playCoo();
 		this._animateBird();
 		this._render();
-
-		this.clickCount++;
 
 		setTimeout(() => {
 			if (this.clickCount === 2) {
@@ -261,9 +260,177 @@ class TappyBird {
 	}
 
 	_animateBird() {
-		this.elBird.classList.add('game__bird--spin');
-		setTimeout(() => this.elBird.classList.remove('game__bird--spin'), SPIN_INTERVAL_MS);
+		const spin = this.clickCount;
+
+		if (spin === 2) {
+			this.elBird.classList.add('game__bird--coin-hit');
+			setTimeout(() => this.elBird.classList.remove('game__bird--coin-hit'), 900);
+			this._spawnCoin();
+		} else if (spin >= 3) {
+			this.elBird.classList.add('game__bird--zap');
+			setTimeout(() => this.elBird.classList.remove('game__bird--zap'), 900);
+			this._spawnLightning();
+			this._playZap();
+		} else {
+			this.elBird.classList.add('game__bird--spin');
+			setTimeout(() => this.elBird.classList.remove('game__bird--spin'), SPIN_INTERVAL_MS);
+		}
+
 		this._spawnFeathers();
+	}
+
+	_spawnCoin() {
+		const scene = this.elBird.parentElement;
+		const birdRect = this.elBird.getBoundingClientRect();
+		const sceneRect = scene.getBoundingClientRect();
+		const bx = birdRect.left - sceneRect.left + birdRect.width / 2;
+		const by = birdRect.top  - sceneRect.top  + birdRect.height / 2;
+
+		// Coin starts off-screen right
+		const startX = sceneRect.width + 20;
+		const startY = by - 10;
+		const travelX = bx - startX;
+		const travelY = by - startY;
+		const duration = 420;
+
+		const coin = document.createElement('div');
+		coin.className = 'coin-projectile';
+		coin.textContent = '₴';
+		coin.style.left = startX + 'px';
+		coin.style.top  = startY + 'px';
+		coin.style.setProperty('--tx', travelX + 'px');
+		coin.style.setProperty('--ty', travelY + 'px');
+		coin.style.setProperty('--duration', duration + 'ms');
+		scene.appendChild(coin);
+
+		// On impact: spawn sparks and play sound
+		setTimeout(() => {
+			coin.remove();
+			this._spawnCoinSparks(bx, by, scene);
+			this._playCoinHit();
+		}, duration);
+
+		setTimeout(() => coin.remove(), duration + 100);
+	}
+
+	_spawnCoinSparks(cx, cy, scene) {
+		const COLORS = ['#ffe040', '#ffd000', '#ffffff', '#ffb300', '#fff8a0'];
+		for (let i = 0; i < 12; i++) {
+			const el = document.createElement('div');
+			el.className = 'coin-spark';
+			const angle = (i / 12) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+			const dist  = 30 + Math.random() * 50;
+			el.style.setProperty('--fc', COLORS[i % COLORS.length]);
+			el.style.setProperty('--sz', (4 + Math.random() * 6) + 'px');
+			el.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+			el.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+			el.style.setProperty('--delay', Math.round(Math.random() * 60) + 'ms');
+			el.style.left = cx + 'px';
+			el.style.top  = cy + 'px';
+			scene.appendChild(el);
+			setTimeout(() => el.remove(), 600);
+		}
+	}
+
+	_playCoinHit() {
+		if (!this.soundOn) return;
+		const ctx = this._getAudioCtx();
+		const t = ctx.currentTime;
+
+		// Metallic ding
+		const osc = ctx.createOscillator();
+		const gain = ctx.createGain();
+		osc.connect(gain);
+		gain.connect(ctx.destination);
+		osc.type = 'sine';
+		osc.frequency.setValueAtTime(1400, t);
+		osc.frequency.exponentialRampToValueAtTime(900, t + 0.18);
+		gain.gain.setValueAtTime(0.4, t);
+		gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+		osc.start(t);
+		osc.stop(t + 0.3);
+
+		// Second overtone for brightness
+		const osc2 = ctx.createOscillator();
+		const gain2 = ctx.createGain();
+		osc2.connect(gain2);
+		gain2.connect(ctx.destination);
+		osc2.type = 'sine';
+		osc2.frequency.setValueAtTime(2200, t);
+		osc2.frequency.exponentialRampToValueAtTime(1600, t + 0.12);
+		gain2.gain.setValueAtTime(0.2, t);
+		gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+		osc2.start(t);
+		osc2.stop(t + 0.2);
+	}
+
+	_playZap() {
+		if (!this.soundOn) return;
+		const ctx = this._getAudioCtx();
+		const t = ctx.currentTime;
+
+		const buf = ctx.createBuffer(1, ctx.sampleRate * 0.4, ctx.sampleRate);
+		const data = buf.getChannelData(0);
+		for (let i = 0; i < data.length; i++) {
+			data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 1.5);
+		}
+		const src = ctx.createBufferSource();
+		src.buffer = buf;
+
+		const filter = ctx.createBiquadFilter();
+		filter.type = 'bandpass';
+		filter.frequency.setValueAtTime(1800, t);
+		filter.frequency.linearRampToValueAtTime(400, t + 0.3);
+		filter.Q.setValueAtTime(0.8, t);
+
+		const gain = ctx.createGain();
+		gain.gain.setValueAtTime(0.6, t);
+		gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+
+		src.connect(filter);
+		filter.connect(gain);
+		gain.connect(ctx.destination);
+		src.start(t);
+	}
+
+	_spawnLightning() {
+		const scene = this.elBird.parentElement;
+		const birdRect = this.elBird.getBoundingClientRect();
+		const sceneRect = scene.getBoundingClientRect();
+		const cx = birdRect.left - sceneRect.left + birdRect.width / 2;
+		const birdTop = birdRect.top - sceneRect.top;
+
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		svg.classList.add('lightning');
+		const boltH = birdTop + 20;
+		svg.setAttribute('width', '48');
+		svg.setAttribute('height', String(boltH));
+		svg.setAttribute('viewBox', `0 0 48 ${boltH}`);
+		svg.style.top = '0px';
+		svg.style.left = (cx - 24) + 'px';
+		svg.style.transform = 'none';
+
+		const pts = `28,0 16,${Math.round(boltH * 0.42)} 30,${Math.round(boltH * 0.42)} 18,${boltH}`;
+		const glow = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+		glow.setAttribute('points', pts);
+		glow.setAttribute('fill', 'none');
+		glow.setAttribute('stroke', 'rgba(200,220,255,0.5)');
+		glow.setAttribute('stroke-width', '10');
+		glow.setAttribute('stroke-linejoin', 'round');
+		glow.setAttribute('stroke-linecap', 'round');
+
+		const bolt = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+		bolt.setAttribute('points', pts);
+		bolt.setAttribute('fill', 'none');
+		bolt.setAttribute('stroke', '#ffffaa');
+		bolt.setAttribute('stroke-width', '3');
+		bolt.setAttribute('stroke-linejoin', 'round');
+		bolt.setAttribute('stroke-linecap', 'round');
+
+		svg.appendChild(glow);
+		svg.appendChild(bolt);
+		scene.appendChild(svg);
+		setTimeout(() => svg.remove(), 900);
 	}
 
 	_spawnFeathers() {
