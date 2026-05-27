@@ -2,7 +2,7 @@ import ConfettiAnimation from './confetti.js';
 
 const BET_OPTIONS = [0.5, 1, 2, 3, 6, 10, 20, 50];
 const SPIN_INTERVAL_MS = 800;
-const INITIAL_BALANCE = 100000;
+const INITIAL_BALANCE = 1500;
 
 class TappyBird {
 	constructor() {
