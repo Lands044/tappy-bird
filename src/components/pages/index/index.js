@@ -263,9 +263,10 @@ class TappyBird {
 		const spin = this.clickCount;
 
 		if (spin === 2) {
-			this.elBird.classList.add('game__bird--coin-hit');
-			setTimeout(() => this.elBird.classList.remove('game__bird--coin-hit'), 900);
-			this._spawnCoin();
+			this.elBird.classList.add('game__bird--drunk');
+			setTimeout(() => this.elBird.classList.remove('game__bird--drunk'), 1100);
+			this._spawnDrunkStars();
+			this._playDrunk();
 		} else if (spin >= 3) {
 			this.elBird.classList.add('game__bird--zap');
 			setTimeout(() => this.elBird.classList.remove('game__bird--zap'), 900);
@@ -279,89 +280,64 @@ class TappyBird {
 		this._spawnFeathers();
 	}
 
-	_spawnCoin() {
+	_spawnDrunkStars() {
 		const scene = this.elBird.parentElement;
 		const birdRect = this.elBird.getBoundingClientRect();
 		const sceneRect = scene.getBoundingClientRect();
-		const bx = birdRect.left - sceneRect.left + birdRect.width / 2;
-		const by = birdRect.top  - sceneRect.top  + birdRect.height / 2;
+		const cx = birdRect.left - sceneRect.left + birdRect.width / 2;
+		const cy = birdRect.top  - sceneRect.top  + birdRect.height * 0.18;
 
-		// Coin starts off-screen right
-		const startX = sceneRect.width + 20;
-		const startY = by - 10;
-		const travelX = bx - startX;
-		const travelY = by - startY;
-		const duration = 420;
+		const COUNT = 5;
+		const EMOJIS = ['⭐', '✨', '💫', '⭐', '✨'];
+		const radius = 52;
 
-		const coin = document.createElement('div');
-		coin.className = 'coin-projectile';
-		coin.textContent = '₴';
-		coin.style.left = startX + 'px';
-		coin.style.top  = startY + 'px';
-		coin.style.setProperty('--tx', travelX + 'px');
-		coin.style.setProperty('--ty', travelY + 'px');
-		coin.style.setProperty('--duration', duration + 'ms');
-		scene.appendChild(coin);
-
-		// On impact: spawn sparks and play sound
-		setTimeout(() => {
-			coin.remove();
-			this._spawnCoinSparks(bx, by, scene);
-			this._playCoinHit();
-		}, duration);
-
-		setTimeout(() => coin.remove(), duration + 100);
-	}
-
-	_spawnCoinSparks(cx, cy, scene) {
-		const COLORS = ['#ffe040', '#ffd000', '#ffffff', '#ffb300', '#fff8a0'];
-		for (let i = 0; i < 12; i++) {
+		for (let i = 0; i < COUNT; i++) {
 			const el = document.createElement('div');
-			el.className = 'coin-spark';
-			const angle = (i / 12) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
-			const dist  = 30 + Math.random() * 50;
-			el.style.setProperty('--fc', COLORS[i % COLORS.length]);
-			el.style.setProperty('--sz', (4 + Math.random() * 6) + 'px');
-			el.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-			el.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
-			el.style.setProperty('--delay', Math.round(Math.random() * 60) + 'ms');
+			el.className = 'drunk-star';
+			el.textContent = EMOJIS[i];
+
+			const startAngle = (i / COUNT) * 360;
+			const spinDeg = startAngle + (i % 2 === 0 ? 360 : -360);
 			el.style.left = cx + 'px';
 			el.style.top  = cy + 'px';
+			el.style.setProperty('--r',     radius + 'px');
+			el.style.setProperty('--ox',    '0px');
+			el.style.setProperty('--oy',    '0px');
+			el.style.setProperty('--sz',    (12 + i * 2) + 'px');
+			el.style.setProperty('--dur',   '1.1s');
+			el.style.setProperty('--delay', (i * 80) + 'ms');
+			el.style.setProperty('--spin',  spinDeg + 'deg');
+			el.style.transformOrigin = '0 0';
+			el.style.transform = `rotate(${startAngle}deg) translateX(${radius}px)`;
+
 			scene.appendChild(el);
-			setTimeout(() => el.remove(), 600);
+			setTimeout(() => el.remove(), 1300);
 		}
 	}
 
-	_playCoinHit() {
+	_playDrunk() {
 		if (!this.soundOn) return;
 		const ctx = this._getAudioCtx();
 		const t = ctx.currentTime;
 
-		// Metallic ding
-		const osc = ctx.createOscillator();
-		const gain = ctx.createGain();
-		osc.connect(gain);
-		gain.connect(ctx.destination);
-		osc.type = 'sine';
-		osc.frequency.setValueAtTime(1400, t);
-		osc.frequency.exponentialRampToValueAtTime(900, t + 0.18);
-		gain.gain.setValueAtTime(0.4, t);
-		gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-		osc.start(t);
-		osc.stop(t + 0.3);
-
-		// Second overtone for brightness
-		const osc2 = ctx.createOscillator();
-		const gain2 = ctx.createGain();
-		osc2.connect(gain2);
-		gain2.connect(ctx.destination);
-		osc2.type = 'sine';
-		osc2.frequency.setValueAtTime(2200, t);
-		osc2.frequency.exponentialRampToValueAtTime(1600, t + 0.12);
-		gain2.gain.setValueAtTime(0.2, t);
-		gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-		osc2.start(t);
-		osc2.stop(t + 0.2);
+		// Wobbly wobble — two sine waves slightly offset in pitch
+		[220, 226].forEach((freq, i) => {
+			const osc  = ctx.createOscillator();
+			const gain = ctx.createGain();
+			osc.connect(gain);
+			gain.connect(ctx.destination);
+			osc.type = 'sine';
+			osc.frequency.setValueAtTime(freq, t);
+			osc.frequency.linearRampToValueAtTime(freq * 1.4, t + 0.15);
+			osc.frequency.linearRampToValueAtTime(freq * 0.85, t + 0.45);
+			osc.frequency.linearRampToValueAtTime(freq, t + 0.7);
+			gain.gain.setValueAtTime(0, t);
+			gain.gain.linearRampToValueAtTime(0.2, t + 0.05);
+			gain.gain.linearRampToValueAtTime(0.15, t + 0.4);
+			gain.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+			osc.start(t + i * 0.02);
+			osc.stop(t + 0.85);
+		});
 	}
 
 	_playZap() {
