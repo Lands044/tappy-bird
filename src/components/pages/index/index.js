@@ -1,13 +1,33 @@
 import ConfettiAnimation from './confetti.js';
+import { loadConfig, watchConfig } from '@js/config/config.js';
+import { registerGameConfig } from '@js/config/normalize.js';
+import { renderLanding } from './render.js';
+import { GAME_FIELDS } from './devmenu.fields.js';
 
-const BET_OPTIONS = [0.5, 1, 2, 3, 6, 10, 20, 50];
+// Wire the game's own normalizeConfig() hook in before loadConfig() runs.
+registerGameConfig();
+
 const SPIN_INTERVAL_MS = 800;
-const INITIAL_BALANCE = 1500;
+
+// Індекс найближчої до `value` ставки зі списку.
+const nearestIndex = (list, value) => list.reduce(
+	(best, item, i) => Math.abs(item - value) < Math.abs(list[best] - value) ? i : best, 0
+);
 
 class TappyBird {
-	constructor() {
-		this.betIndex = BET_OPTIONS.indexOf(6);
-		this.balance = INITIAL_BALANCE;
+	constructor(config) {
+		this.config = config;
+		this.betOptions = config.game.betOptions;
+		this.taps = config.game.taps;
+
+		// Відстежені listeners/timers — знімаються в destroy() при перестворенні
+		// гри на live-reload конфігу (watchConfig).
+		this.listeners = [];
+		this.timers = new Set();
+		this.intervals = new Set();
+
+		this.betIndex = nearestIndex(this.betOptions, config.game.bet);
+		this.balance = config.game.balance;
 		this.lastWin = 0;
 		this.spinning = false;
 		this.clickCount = 0;
@@ -33,8 +53,10 @@ class TappyBird {
 		this.elJackpotGrand = document.getElementById('jackpotGrand');
 		this.elJackpotMajor = document.getElementById('jackpotMajor');
 
-		this.soundOn = true;
+		this.soundOn = config.sound.enabled;
 		this.audioCtx = null;
+		this.audioOut = null;
+		this.elSound.style.opacity = this.soundOn ? '1' : '0.4';
 
 		this.elInfo.disabled = true;
 		this.elInfo.style.opacity = '0.35';
@@ -45,9 +67,45 @@ class TappyBird {
 		this._render();
 	}
 
+	_delay(fn, time) {
+		const id = setTimeout(() => {
+			this.timers.delete(id);
+			fn();
+		}, time);
+		this.timers.add(id);
+		return id;
+	}
+
+	_on(el, event, fn, options) {
+		el.addEventListener(event, fn, options);
+		this.listeners.push([el, event, fn, options]);
+	}
+
+	destroy() {
+		this.timers.forEach(id => clearTimeout(id));
+		this.timers.clear();
+		this.intervals.forEach(id => clearInterval(id));
+		this.intervals.clear();
+		this.listeners.forEach(([el, event, fn, options]) => el.removeEventListener(event, fn, options));
+		this.listeners = [];
+
+		this.elBird.classList.remove('game__bird--spin', 'game__bird--drunk', 'game__bird--zap');
+		this.elControls.style.pointerEvents = '';
+		this.elControls.style.opacity = '';
+		this._setAutoActive(false);
+		this.popup.classList.remove('show');
+		this.confettiAnimation?.destroy();
+		this.confettiAnimation = null;
+		this.audioCtx?.close();
+	}
+
 	_getAudioCtx() {
 		if (!this.audioCtx) {
 			this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+			// Спільний вихід з гучністю з config.sound.volume.
+			this.audioOut = this.audioCtx.createGain();
+			this.audioOut.gain.value = this.config.sound.volume;
+			this.audioOut.connect(this.audioCtx.destination);
 		}
 		return this.audioCtx;
 	}
@@ -61,7 +119,7 @@ class TappyBird {
 		const osc = ctx.createOscillator();
 		const gain = ctx.createGain();
 		osc.connect(gain);
-		gain.connect(ctx.destination);
+		gain.connect(this.audioOut);
 
 		osc.type = 'sine';
 		// Низька нота що плавно піднімається — характерне "у-у-ур"
@@ -89,7 +147,7 @@ class TappyBird {
 			const osc = ctx.createOscillator();
 			const gain = ctx.createGain();
 			osc.connect(gain);
-			gain.connect(ctx.destination);
+			gain.connect(this.audioOut);
 			const t = ctx.currentTime + i * 0.08;
 			osc.type = 'triangle';
 			osc.frequency.setValueAtTime(freq, t);
@@ -107,7 +165,7 @@ class TappyBird {
 		const osc = ctx.createOscillator();
 		const gain = ctx.createGain();
 		osc.connect(gain);
-		gain.connect(ctx.destination);
+		gain.connect(this.audioOut);
 		const t = ctx.currentTime;
 		osc.type = 'square';
 		osc.frequency.setValueAtTime(800, t);
@@ -119,15 +177,15 @@ class TappyBird {
 
 	_tap(el, fn) {
 		let touched = false;
-		el.addEventListener('touchstart', (e) => {
+		this._on(el, 'touchstart', (e) => {
 			e.preventDefault();
 			touched = true;
 		}, { passive: false });
-		el.addEventListener('touchend', (e) => {
+		this._on(el, 'touchend', (e) => {
 			e.preventDefault();
 			if (touched) { touched = false; fn(); }
 		}, { passive: false });
-		el.addEventListener('click', () => {
+		this._on(el, 'click', () => {
 			if (touched) return;
 			fn();
 		});
@@ -145,7 +203,7 @@ class TappyBird {
 	}
 
 	_changeBet(dir) {
-		this.betIndex = Math.max(0, Math.min(BET_OPTIONS.length - 1, this.betIndex + dir));
+		this.betIndex = Math.max(0, Math.min(this.betOptions.length - 1, this.betIndex + dir));
 		this._playTick();
 		this._render();
 	}
@@ -153,7 +211,7 @@ class TappyBird {
 	_spin() {
 		if (this.spinning) return;
 
-		const bet = BET_OPTIONS[this.betIndex];
+		const bet = this.betOptions[this.betIndex];
 		if (this.balance < bet) return;
 
 		this.spinning = true;
@@ -167,19 +225,19 @@ class TappyBird {
 		this._animateBird();
 		this._render();
 
-		setTimeout(() => {
-			if (this.clickCount === 2) {
-				const win = +(bet * 0.2).toFixed(2);
+		const tap = this._currentTap();
+		const isLastTap = this.clickCount >= this.taps.length;
+
+		this._delay(() => {
+			if (tap.winMultiplier > 0) {
+				const win = +(bet * tap.winMultiplier).toFixed(2);
 				this.lastWin = win;
 				this.balance += win;
 				this._playWin();
 				this._spawnWinLabel(`+${win.toFixed(2)}`);
-			} else if (this.clickCount >= 3) {
-				const win = +(bet * 0.8).toFixed(2);
-				this.lastWin = win;
-				this.balance += win;
-				this._playWin();
-				this._spawnWinLabel(`+${win.toFixed(2)}`);
+			}
+
+			if (isLastTap) {
 				this.clickCount = 0;
 				this.autoPlaying = false;
 				this.spinning = false;
@@ -200,6 +258,11 @@ class TappyBird {
 		}, SPIN_INTERVAL_MS);
 	}
 
+	// Сценарний тап для поточного кліку (game.taps; за межами списку — останній).
+	_currentTap() {
+		return this.taps[Math.min(this.clickCount, this.taps.length) - 1];
+	}
+
 	_autoPlay() {
 		if (this.autoPlaying || this.spinning) return;
 		this.autoPlaying = true;
@@ -209,11 +272,11 @@ class TappyBird {
 			if (count === 0) return;
 			this._spin();
 			// Чекаємо завершення поточного спіну + невелика пауза між кліками
-			setTimeout(() => doSpin(count - 1), SPIN_INTERVAL_MS + 300);
+			this._delay(() => doSpin(count - 1), SPIN_INTERVAL_MS + 300);
 		};
 
-		// Запускаємо 3 кліки з затримкою
-		doSpin(3);
+		// Проганяємо весь сценарій тапів з затримкою
+		doSpin(this.taps.length);
 	}
 
 	_setAutoActive(on) {
@@ -222,7 +285,7 @@ class TappyBird {
 	}
 
 	_resetGame() {
-		this.balance = INITIAL_BALANCE;
+		this.balance = this.config.game.balance;
 		this.lastWin = 0;
 		this.clickCount = 0;
 		this.spinning = false;
@@ -260,14 +323,14 @@ class TappyBird {
 	}
 
 	_animateBird() {
-		const spin = this.clickCount;
+		const { effect } = this._currentTap();
 
-		if (spin === 2) {
+		if (effect === 'drunk') {
 			this.elBird.classList.add('game__bird--drunk');
 			setTimeout(() => this.elBird.classList.remove('game__bird--drunk'), 1100);
 			this._spawnDrunkStars();
 			this._playDrunk();
-		} else if (spin >= 3) {
+		} else if (effect === 'zap') {
 			this.elBird.classList.add('game__bird--zap');
 			setTimeout(() => this.elBird.classList.remove('game__bird--zap'), 900);
 			this._spawnLightning();
@@ -325,7 +388,7 @@ class TappyBird {
 			const osc  = ctx.createOscillator();
 			const gain = ctx.createGain();
 			osc.connect(gain);
-			gain.connect(ctx.destination);
+			gain.connect(this.audioOut);
 			osc.type = 'sine';
 			osc.frequency.setValueAtTime(freq, t);
 			osc.frequency.linearRampToValueAtTime(freq * 1.4, t + 0.15);
@@ -365,7 +428,7 @@ class TappyBird {
 
 		src.connect(filter);
 		filter.connect(gain);
-		gain.connect(ctx.destination);
+		gain.connect(this.audioOut);
 		src.start(t);
 	}
 
@@ -449,23 +512,30 @@ class TappyBird {
 	}
 
 	_tickJackpots() {
-		setInterval(() => {
-			const minor = parseFloat(this.elJackpotMinor.textContent) + (Math.random() * 0.03);
-			const grand = parseFloat(this.elJackpotGrand.textContent) + (Math.random() * 0.12);
-			const major = parseFloat(this.elJackpotMajor.textContent) + (Math.random() * 0.05);
+		const { jackpots, jackpotGrowth, jackpotInterval } = this.config.game;
+		this.elJackpotMinor.textContent = jackpots.minor.toFixed(2);
+		this.elJackpotGrand.textContent = jackpots.grand.toFixed(2);
+		this.elJackpotMajor.textContent = jackpots.major.toFixed(2);
+
+		const id = setInterval(() => {
+			const minor = parseFloat(this.elJackpotMinor.textContent) + (Math.random() * jackpotGrowth.minor);
+			const grand = parseFloat(this.elJackpotGrand.textContent) + (Math.random() * jackpotGrowth.grand);
+			const major = parseFloat(this.elJackpotMajor.textContent) + (Math.random() * jackpotGrowth.major);
 			this.elJackpotMinor.textContent = minor.toFixed(2);
 			this.elJackpotGrand.textContent = grand.toFixed(2);
 			this.elJackpotMajor.textContent = major.toFixed(2);
-		}, 1500);
+		}, jackpotInterval);
+		this.intervals.add(id);
 	}
 
 	_render() {
-		const bet = BET_OPTIONS[this.betIndex];
-		this.elBalance.textContent  = `€${this._fmt(this.balance)}`;
-		this.elBet.textContent      = `€${bet.toFixed(2)}`;
-		this.elLastWin.textContent  = `€${this._fmt(this.lastWin)}`;
+		const bet = this.betOptions[this.betIndex];
+		const cur = this.config.game.currency;
+		this.elBalance.textContent  = `${cur}${this._fmt(this.balance)}`;
+		this.elBet.textContent      = `${cur}${bet.toFixed(2)}`;
+		this.elLastWin.textContent  = `${cur}${this._fmt(this.lastWin)}`;
 		this.elBetMinus.disabled    = this.betIndex === 0 || this.spinning;
-		this.elBetPlus.disabled     = this.betIndex === BET_OPTIONS.length - 1 || this.spinning;
+		this.elBetPlus.disabled     = this.betIndex === this.betOptions.length - 1 || this.spinning;
 	}
 
 	_fmt(val) {
@@ -476,7 +546,7 @@ class TappyBird {
 		this.elControls.style.pointerEvents = 'none';
 		this.elControls.style.opacity = '0.5';
 
-		setTimeout(() => {
+		this._delay(() => {
 			this.popup.classList.add('show');
 			if (!this.confettiAnimation) {
 				this.confettiAnimation = new ConfettiAnimation(this.popup);
@@ -485,6 +555,39 @@ class TappyBird {
 	}
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-	new TappyBird();
+let game = null;
+
+// Рендерить статичну частину (арт/тексти/CTA) і (пере)створює гру для даного
+// конфігу. Викликається один раз при завантаженні і знову на кожну зміну
+// config.json — тому знімає listeners/timers попереднього інстансу.
+function mount(config) {
+	game?.destroy();
+
+	renderLanding(config);
+	game = new TappyBird(config);
+}
+
+let devMenu = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+	const config = await loadConfig();
+	mount(config);
+
+	// Редагування public/config.json перерендерює лендінг на місці — без білду
+	// і без перезавантаження сторінки.
+	watchConfig(config, (next) => {
+		mount(next);
+		devMenu?.sync(next);
+	});
+
+	// Панель конфігу — і в production теж (керується config.dev.menu): у dev
+	// пише в public/config.json, у зібраному білді — в localStorage браузера
+	// (див. docs/config.md, "The config menu"). Для строго dev-only варіанту:
+	// `import.meta.env.DEV && config.dev.menu`.
+	if (config.dev.menu) {
+		const { initDevMenu, CORE_FIELDS } = await import('@js/config/devmenu.js');
+		devMenu = await initDevMenu(config, (next) => mount(next), {
+			fields: [...GAME_FIELDS, ...CORE_FIELDS]
+		});
+	}
 });

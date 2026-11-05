@@ -1,0 +1,80 @@
+{
+	"$comment": "Runtime config for this landing. This file is served as-is from the public folder and is fetched by the page on every load, so editing it changes the landing WITHOUT a rebuild. Reload the page (or let the dev watcher pick it up) and the landing re-renders.",
+	"version": 1,
+	"game": {
+		"$comment": "Each tap on the bird / SPIN costs `bet` and plays the next entry of `taps`: effect = spin | drunk | zap, payout = bet × winMultiplier. After the last tap the CTA popup opens.",
+		"currency": "€",
+		"balance": 1500,
+		"betOptions": [
+			"0.5",
+			"1",
+			"2",
+			"3",
+			"6",
+			"10",
+			"20",
+			"50"
+		],
+		"bet": 6,
+		"taps": [
+			{
+				"effect": "spin",
+				"winMultiplier": 0
+			},
+			{
+				"effect": "drunk",
+				"winMultiplier": 0.2
+			},
+			{
+				"effect": "zap",
+				"winMultiplier": 0.8
+			}
+		],
+		"jackpots": {
+			"minor": 17.79,
+			"grand": 146.62,
+			"major": 30.56
+		},
+		"jackpotGrowth": {
+			"minor": 0.03,
+			"grand": 0.12,
+			"major": 0.05
+		},
+		"jackpotInterval": 1500
+	},
+	"cta": {
+		"url": "https://example.com/",
+		"target": "_self"
+	},
+	"texts": {
+		"actionButton": "SPIN",
+		"freeSpinsButton": "BUY<br>FREE SPINS",
+		"balanceLabel": "BALANCE",
+		"betLabel": "BET",
+		"lastWinLabel": "LAST WIN",
+		"jackpotMinor": "MINOR",
+		"jackpotGrand": "GRAND",
+		"jackpotMajor": "MAJOR",
+		"popupTitle": "Congratulations!",
+		"popupText": "Ready to continue playing?",
+		"ctaButton": "Download Now",
+		"rotateNotice": "Please rotate your device to portrait mode"
+	},
+	"sound": {
+		"$comment": "All sounds are synthesized in the browser (WebAudio) — there are no audio files. enabled = initial state of the sound button.",
+		"enabled": true,
+		"volume": 1
+	},
+	"assets": {
+		"$comment": "Values are either a built-in key (a filename under src/assets/img, no extension) or a URL. A URL starting with / , ./ , http:// or https:// is used verbatim, so you can drop custom art into the public folder and point at it here.",
+		"background": "bg",
+		"backgroundMove": "bg-move",
+		"bird": "birdie"
+	},
+	"dev": {
+		"$comment": "watch polls this file and re-renders the landing in place when it changes. menu enables the config editor panel (also in production builds, where it saves to this browser's localStorage only).",
+		"watch": true,
+		"watchInterval": 1500,
+		"menu": true
+	}
+}
