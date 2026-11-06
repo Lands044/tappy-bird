@@ -5,9 +5,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="shortcut icon" href="./assets/img/favicon.ico">
 		<title>Tappy Bird</title>
-		<script type="module" crossorigin="" src="./js/index.min.js?v=1779890897104"></script>
-		<link rel="modulepreload" crossorigin="" href="./js/common.min.js?v=1779890897104">
-		<link rel="stylesheet" crossorigin="" href="./css/index.min.css?v=1779890897104">
+		<script type="module" crossorigin="" src="./js/index.min.js?v=1793897230970"></script>
+		<link rel="modulepreload" crossorigin="" href="./js/common.min.js?v=1793897230970">
+		<link rel="stylesheet" crossorigin="" href="./css/index.min.css?v=1793897230970">
 	</head>
 	<body>
 		<div class="wrapper">
@@ -42,7 +42,7 @@
 								<!-- Free spins nest button -->
 								<div class="game__freespins" id="freeSpinsBtn">
 									<div class="game__freespins-glow"></div>
-									<span>
+									<span id="freeSpinsLabel">
 										BUY
 										<br>
 										FREE SPINS
@@ -53,16 +53,16 @@
 						<!-- Info bar -->
 						<div class="game__info">
 							<div class="game__info-item">
-								<span class="game__info-label">BALANCE</span>
+								<span class="game__info-label" id="balanceLabel">BALANCE</span>
 								<span class="game__info-value" id="balance">€1,500.00</span>
 							</div>
 							<div class="game__info-item">
-								<span class="game__info-label">BET</span>
+								<span class="game__info-label" id="betLabel">BET</span>
 								<span class="game__info-value" id="bet">€6.00</span>
 							</div>
 							<div class="game__info-item">
-								<span class="game__info-label">LAST WIN</span>
-								<span class="game__info-value" id="lastWin">€90.00</span>
+								<span class="game__info-label" id="lastWinLabel">LAST WIN</span>
+								<span class="game__info-value" id="lastWin">€0.00</span>
 							</div>
 						</div>
 						<!-- Controls -->
